@@ -26,7 +26,7 @@ using namespace LAMMPS_NS;
 /* ---------------------------------------------------------------------- */
 
 ComputeNeighAtom::ComputeNeighAtom(LAMMPS *lmp, int narg, char **arg) :
-    Compute(lmp, narg, arg), typelo(nullptr), typehi(nullptr), cvec(nullptr), carray(nullptr),
+    Compute(lmp, narg, arg), cvec(nullptr), carray(nullptr),
     group2(nullptr), normv(nullptr)
 {
   if (narg < 5) error->all(FLERR, "Illegal compute neigh/atom command");
@@ -163,8 +163,8 @@ void ComputeNeighAtom::compute_peratom()
         if (mask[j] & jgroupbit){
 
           delx = xtmp - x[j][0];
-          dely = ytmp - y[j][0];
-          delz = ztmp - z[j][0];
+          dely = ytmp - x[j][1];
+          delz = ztmp - x[j][2];
 
           rsq = delx * dely + dely * dely + delz * delz;
           r = sqrt(rsq);
@@ -173,7 +173,7 @@ void ComputeNeighAtom::compute_peratom()
             carray[i][0] = j;
             carray[i][1] = r;
           }
-          elif (carray[i][1] > r) {
+	  else if (carray[i][1] > r) {
             carray[i][0] = j;
             carray[i][1] = r;
           }
@@ -186,7 +186,7 @@ void ComputeNeighAtom::compute_peratom()
 
 /* ---------------------------------------------------------------------- */
 
-int ComputeCoordAtom::pack_forward_comm(int n, int *list, double *buf, int /*pbc_flag*/,
+int ComputeNeighAtom::pack_forward_comm(int n, int *list, double *buf, int /*pbc_flag*/,
                                         int * /*pbc*/)
 {
   int i, m = 0, j;
@@ -199,7 +199,7 @@ int ComputeCoordAtom::pack_forward_comm(int n, int *list, double *buf, int /*pbc
 
 /* ---------------------------------------------------------------------- */
 
-void ComputeCoordAtom::unpack_forward_comm(int n, int first, double *buf)
+void ComputeNeighAtom::unpack_forward_comm(int n, int first, double *buf)
 {
   int i, last, m = 0, j;
   last = first + n;
@@ -212,7 +212,7 @@ void ComputeCoordAtom::unpack_forward_comm(int n, int first, double *buf)
    memory usage of local atom-based array
 ------------------------------------------------------------------------- */
 
-double ComputeCoordAtom::memory_usage()
+double ComputeNeighAtom::memory_usage()
 {
   double bytes = (double) ncol * nmax * sizeof(double);
   return bytes;
